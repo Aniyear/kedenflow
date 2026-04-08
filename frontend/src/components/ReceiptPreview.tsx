@@ -107,17 +107,6 @@ export default function ReceiptPreview({
 
       {editData.type === "payment" && (
         <>
-          <div className="form-group">
-            <label className="form-label">ИИН/БИН</label>
-            <input
-              className="form-input"
-              type="text"
-              value={editData.party_identifier ?? ""}
-              onChange={(e) =>
-                updateField("party_identifier", e.target.value || null)
-              }
-            />
-          </div>
           <div className="form-row">
             <div className="form-group">
               <label className="form-label">КБК</label>

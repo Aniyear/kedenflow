@@ -99,10 +99,17 @@ RULE 1 - TYPE:
 - Use "transfer" ONLY if it is a money transfer to another individual's bank account/card.
 - Default is "payment" if uncertain.
 
-RULE 2 - AMOUNT:
-- Extract the TOTAL payment amount (the largest/final amount in the receipt).
-- Remove ALL spaces from the number. Use a dot (.) as decimal separator.
-- Example: "3 910 000.00 ₸" → 3910000.0
+RULE 2 - AMOUNT (⚠️ CRITICAL — DO NOT GET THIS WRONG):
+- Extract the TOTAL payment amount as a plain JSON number.
+- In Kazakh/Russian formatting: SPACE is the THOUSANDS separator, COMMA or DOT before 2 final digits is the DECIMAL separator.
+- CORRECT parsing examples:
+    "24 650,00 ₸"      → 24650.0       (24 thousand 650, NOT 2465000)
+    "3 910 000.00 ₸"   → 3910000.0
+    "1 000 000,00 ₸"   → 1000000.0
+    "500,00 ₸"         → 500.0
+    "75 000 ₸"         → 75000.0
+- DO NOT remove the decimal part. DO NOT multiply the number.
+- Return ONLY the final number, no currency signs, no spaces.
 
 RULE 3 - DATETIME:
 - Copy the date and time EXACTLY as it appears in the text (e.g. "09.01.2026 15:03:22").
@@ -155,11 +162,45 @@ class ReceiptParserService:
         "%Y-%m-%d %H:%M", "%Y-%m-%d %H:%M:%S",
         "%d.%m.%Y", "%d-%m-%Y",
     ]
-    AMOUNT_PATTERNS = [
-        r"(\d[\d\s]*\d)\s*₸",
-        r"(\d[\d\s]*[\.,]\d{2})\s*(?:KZT|тенге|тг)",
-        r"[Сс]умма[:\s]*(\d[\d\s]*[\.,]?\d*)",
-    ]
+    @staticmethod
+    def _parse_amount_string(value: str | float | int | None) -> float | None:
+        """
+        Safely parse Kazakh/Russian formatted amounts.
+
+        Handles:
+          - "24 650,00"   → 24650.00  (space=thousands, comma=decimal)
+          - "3 910 000.00" → 3910000.00 (space=thousands, dot=decimal)
+          - "1 000 000,00" → 1000000.00
+          - 3910000.0     → 3910000.0  (already a number)
+        """
+        if value is None:
+            return None
+        if isinstance(value, (int, float)):
+            return float(value)
+
+        s = str(value).strip()
+        # Remove currency symbols
+        s = re.sub(r"[₸$€£¥]", "", s).strip()
+
+        if not s:
+            return None
+
+        # Detect decimal separator: the last comma or dot followed by exactly 1-2 digits at end
+        decimal_match = re.search(r"([.,])(\d{1,2})$", s)
+        if decimal_match:
+            decimal_sep = decimal_match.group(1)
+            # Remove thousands separators (spaces + the opposite separator)
+            thousands_sep = "," if decimal_sep == "." else "."
+            s = s.replace(" ", "").replace(thousands_sep, "").replace(decimal_sep, ".")
+        else:
+            # No decimal part — just remove all separators
+            s = re.sub(r"[\s,.]", "", s)
+
+        try:
+            return float(s)
+        except ValueError:
+            return None
+
     RECEIPT_NUMBER_PATTERNS = [
         r"№\s*(?:квитанции|документа|чека)[:\s]*([^\n]+)",
         r"(?:Квитанция|Чек|Документ)\s*№?\s*[:\s]*([A-Za-z0-9\-]+)",
@@ -317,15 +358,8 @@ class ReceiptParserService:
                             break
                 parsed_data[field_name] = ", ".join(parts) if parts else None
 
-        # 3. Convert amount: handle string with spaces/commas
-        raw_amount = parsed_data.get("amount")
-        if isinstance(raw_amount, str):
-            try:
-                parsed_data["amount"] = float(
-                    raw_amount.replace(" ", "").replace(",", ".")
-                )
-            except ValueError:
-                parsed_data["amount"] = None
+        # 3. Normalize amount using smart parser
+        parsed_data["amount"] = cls._parse_amount_string(parsed_data.get("amount"))
 
         # 4. Unwrap list wrapping
         if isinstance(parsed_data, list) and len(parsed_data) > 0:
