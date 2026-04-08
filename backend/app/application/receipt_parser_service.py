@@ -258,9 +258,31 @@ class ReceiptParserService:
                 return cls._regex_parse(text)
 
             parsed_data = json.loads(content)
+            
+            # --- Data Sanitization (for models that ignore strict schema) ---
+            # 1. Map 'type' to valid literals
+            raw_type = str(parsed_data.get("type", "payment")).lower()
+            if "transfer" in raw_type or "перевод" in raw_type:
+                parsed_data["type"] = "transfer"
+            else:
+                parsed_data["type"] = "payment"
+
+            # 2. Convert dicts in party fields to strings
+            for field_name in ["party_from", "party_to"]:
+                val = parsed_data.get(field_name)
+                if isinstance(val, dict):
+                    # Combine name/iin/bin into a single string
+                    parts = []
+                    if val.get("name"): parts.append(str(val["name"]))
+                    if val.get("bin"): parts.append(f"БИН {val['bin']}")
+                    if val.get("iin"): parts.append(f"ИИН {val['iin']}")
+                    parsed_data[field_name] = ", ".join(parts)
+
+            # Handle if Llama wraps the object in a list
             if isinstance(parsed_data, list) and len(parsed_data) > 0:
                 parsed_data = parsed_data[0]
                 
+            logger.info(f"Sanitized data before validation: {parsed_data}")
             parsed = LLMReceiptSchema.model_validate(parsed_data)
             logger.info("Pydantic validation successful.")
             
