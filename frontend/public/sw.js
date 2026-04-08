@@ -28,21 +28,36 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// Fetch — network first, fallback to cache, then offline page
+// Fetch — network first, fallback to cache, then app shell (/)
 self.addEventListener("fetch", (event) => {
   // Skip non-GET requests
   if (event.request.method !== "GET") return;
 
-  // Skip API requests
-  if (event.request.url.includes("/api/") || event.request.url.includes(":8000")) {
+  const url = new URL(event.request.url);
+
+  // Skip API requests and external/dev-server requests
+  if (url.pathname.startsWith("/api/") || url.port === "8000" || url.hostname === "localhost") {
+    return;
+  }
+
+  // Navigation requests — always serve app shell (/) to let React handle routing
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => caches.match("/"))
+    );
     return;
   }
 
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Cache successful responses
-        if (response.status === 200) {
+        // Cache successful static assets
+        if (response.status === 200 && (
+          url.pathname.startsWith("/_next/") || 
+          url.pathname.startsWith("/icons/") ||
+          url.pathname === "/manifest.json"
+        )) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, clone);
@@ -51,14 +66,9 @@ self.addEventListener("fetch", (event) => {
         return response;
       })
       .catch(async () => {
-        // Try cache
+        // Try cache for assets
         const cached = await caches.match(event.request);
         if (cached) return cached;
-
-        // Fallback to offline page for navigation requests
-        if (event.request.mode === "navigate") {
-          return caches.match(OFFLINE_URL);
-        }
 
         return new Response("Offline", { status: 503 });
       })

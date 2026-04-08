@@ -104,11 +104,21 @@ export default function BrokerDetailPage() {
       {/* Header */}
       <header className="header">
         <div className="header__inner">
-          <div>
-            <Link href="/" className="back-link">
-              ← Все декларанты
-            </Link>
-            <h1>{broker.name}</h1>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+            <div>
+              <Link href="/" className="back-link">
+                ← Все декларанты
+              </Link>
+              <h1>{broker.name}</h1>
+            </div>
+            <button 
+              className="btn btn--ghost btn--sm" 
+              onClick={() => window.location.reload()} 
+              title="Обновить страницу"
+              style={{ padding: '8px', minWidth: 'auto', borderRadius: '50%', color: 'var(--accent)' }}
+            >
+              🔄
+            </button>
           </div>
         </div>
       </header>

@@ -65,6 +65,14 @@ export default function HomePage() {
               <div className="header__title">FinLog</div>
               <div className="header__subtitle">Учёт задолженностей</div>
             </div>
+            <button 
+              className="btn btn--ghost btn--sm" 
+              onClick={() => window.location.reload()} 
+              title="Обновить страницу"
+              style={{ padding: '8px', minWidth: 'auto', borderRadius: '50%', color: 'var(--accent)' }}
+            >
+              🔄
+            </button>
           </div>
           <button
             className="btn btn--primary"

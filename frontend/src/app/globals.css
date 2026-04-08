@@ -108,9 +108,9 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-primary);
 }
 
-h1 { font-size: 2rem; }
-h2 { font-size: 1.5rem; }
-h3 { font-size: 1.25rem; }
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.25rem; }
+h3 { font-size: 1.1rem; }
 
 a {
   color: var(--accent);
@@ -126,16 +126,24 @@ a:hover {
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--space-lg) calc(var(--space-2xl) + env(safe-area-inset-bottom, 20px));
+  padding: 0 var(--space-xl) calc(var(--space-2xl) + env(safe-area-inset-bottom, 20px));
   position: relative;
   z-index: 1;
 }
 
+@media (max-width: 640px) {
+  .container {
+    padding: 0 var(--space-md);
+  }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.1rem; }
+}
+
 /* ===== Header ===== */
 .header {
-  padding: var(--space-xl) 0;
+  padding: var(--space-lg) 0;
   border-bottom: 1px solid var(--border-color);
-  margin-bottom: var(--space-2xl);
+  margin-bottom: var(--space-xl);
 }
 
 .header__inner {
@@ -211,12 +219,12 @@ a:hover {
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
-  padding: 0.625rem 1.25rem;
+  padding: 0.5rem 1rem;
   font-family: var(--font-sans);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: 0.625rem;
   cursor: pointer;
   transition: all var(--transition-base);
   white-space: nowrap;
@@ -363,13 +371,13 @@ a:hover {
 
 .form-input {
   width: 100%;
-  padding: 0.625rem 0.875rem;
+  padding: 0.5rem 0.75rem;
   background: var(--bg-glass);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   color: var(--text-primary);
   font-family: var(--font-sans);
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   transition: all var(--transition-fast);
   outline: none;
 }
