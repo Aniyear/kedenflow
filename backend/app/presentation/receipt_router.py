@@ -39,17 +39,19 @@ async def upload_receipt(file: UploadFile = File(...)):
     Returns parsed preview for user review before saving.
     """
     # Validate file type
-    if not file.filename or not file.filename.lower().endswith(".pdf"):
+    allowed_extensions = [".pdf", ".jpg", ".jpeg", ".png"]
+    allowed_mimes = ["application/pdf", "image/jpeg", "image/png"]
+    if not file.filename or not any(file.filename.lower().endswith(ext) for ext in allowed_extensions):
         raise HTTPException(
             status_code=400,
-            detail="Only PDF files are accepted",
+            detail="Unsupported file type. Allowed: PDF, JPG, PNG",
         )
 
     content_type = file.content_type or ""
-    if content_type and content_type != "application/pdf":
+    if content_type and content_type not in allowed_mimes:
         raise HTTPException(
             status_code=400,
-            detail="Only PDF files are accepted",
+            detail="Unsupported MIME type. Allowed: application/pdf, image/jpeg, image/png",
         )
 
     # Read file
@@ -82,10 +84,11 @@ async def bulk_upload_receipts(files: list[UploadFile] = File(...)):
     """Upload multiple PDF receipts and parse them sequentially."""
     responses = []
     logger.info(f"Received bulk upload request with {len(files)} files")
+    allowed_extensions = [".pdf", ".jpg", ".jpeg", ".png"]
     for file in files:
         logger.info(f"Processing file: {file.filename} (Type: {file.content_type})")
-        if not file.filename or not file.filename.lower().endswith(".pdf"):
-            logger.warning(f"File {file.filename} skipped: not a PDF")
+        if not file.filename or not any(file.filename.lower().endswith(ext) for ext in allowed_extensions):
+            logger.warning(f"File {file.filename} skipped: unsupported type")
             continue
             
         try:

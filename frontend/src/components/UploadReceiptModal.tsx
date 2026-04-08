@@ -23,14 +23,15 @@ export default function UploadReceiptModal({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedList = Array.from(e.target.files || []);
-    const pdfs = selectedList.filter((f) =>
-      f.name.toLowerCase().endsWith(".pdf")
+    const allowedExtensions = [".pdf", ".jpg", ".jpeg", ".png"];
+    const validFiles = selectedList.filter((f) =>
+      allowedExtensions.some((ext) => f.name.toLowerCase().endsWith(ext))
     );
-    if (pdfs.length === 0) {
-      if (selectedList.length > 0) setError("Только PDF файлы");
+    if (validFiles.length === 0) {
+      if (selectedList.length > 0) setError("Только PDF, JPG или PNG файлы");
       return;
     }
-    setFiles(pdfs);
+    setFiles(validFiles);
     setPreviews(null);
     setError(null);
   };
@@ -133,14 +134,14 @@ export default function UploadReceiptModal({
               <div className="file-upload__text">
                 {files.length > 0
                   ? `Выбрано файлов: ${files.length}`
-                  : "Выберите один или несколько PDF"}
+                  : "Выберите файлы (PDF, JPG, PNG)"}
               </div>
-              <div className="file-upload__hint">Можно выделить сразу много</div>
+              <div className="file-upload__hint">Можно выбрать сразу несколько</div>
               <input
                 id="receipt-file-input"
                 type="file"
                 multiple
-                accept=".pdf,application/pdf"
+                accept=".pdf,application/pdf,.jpg,.jpeg,.png,image/jpeg,image/png"
                 onChange={handleFileChange}
                 style={{ display: "none" }}
               />
