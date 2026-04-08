@@ -46,7 +46,7 @@ class LLMReceiptSchema(BaseModel):
     datetime_str: str | None = Field(
         default=None, description="Дата и время из чека 'как есть' (например '03.02.2026 15:35')."
     )
-    receipt_number: str | None = Field(
+    receipt_number: str | int | None = Field(
         default=None, description="Номер чека или квитанции, документа."
     )
     party_from: str | None = Field(
@@ -55,13 +55,13 @@ class LLMReceiptSchema(BaseModel):
     party_to: str | None = Field(
         default=None, description="Получатель, бенефициар (ФИО или название)."
     )
-    party_identifier: str | None = Field(
+    party_identifier: str | int | None = Field(
         default=None, description="ИИН/БИН плательщика или получателя, если указано."
     )
-    kbk: str | None = Field(
+    kbk: str | int | None = Field(
         default=None, description="КБК (код бюджетной классификации)."
     )
-    knp: str | None = Field(
+    knp: str | int | None = Field(
         default=None, description="КНП (код назначения платежа)."
     )
 
@@ -261,12 +261,12 @@ class ReceiptParserService:
             amount=parsed.amount,
             datetime_str=dt_raw,
             parsed_datetime=dt_parsed,
-            receipt_number=parsed.receipt_number,
+            receipt_number=str(parsed.receipt_number) if parsed.receipt_number is not None else None,
             party_from=parsed.party_from,
             party_to=parsed.party_to,
-            party_identifier=parsed.party_identifier,
-            kbk=parsed.kbk,
-            knp=parsed.knp,
+            party_identifier=str(parsed.party_identifier) if parsed.party_identifier is not None else None,
+            kbk=str(parsed.kbk) if parsed.kbk is not None else None,
+            knp=str(parsed.knp) if parsed.knp is not None else None,
             raw_text=text
         )
 
