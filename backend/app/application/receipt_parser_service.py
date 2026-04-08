@@ -15,6 +15,7 @@ from typing import Optional, Literal
 
 import fitz  # PyMuPDF
 import openai
+import easyocr
 from pydantic import BaseModel, Field
 
 from app.infrastructure.config import get_settings
@@ -127,7 +128,9 @@ RULE 5 - PARTY_FROM:
 
 RULE 6 - PARTY_TO:
 - Return ONLY a plain text string — the name of the recipient/beneficiary.
-- Example: "РГУ \\"УГД по городу Талдыкорган ДГД по области Жетісу КГД МФ РК\\"".
+- ⚠️ IMPORTANT: In Kaspi transfers, the recipient's name (e.g., "Дастан О.") often follows the amount. OCR might add noise characters like "oe", "ә", "«" to the name. Clean them up.
+- ⚠️ IMPORTANT: If a name is followed by "0." or "o.", this is likely a misread initial "О.". Return it as "О." (e.g., "Дастан О.").
+- ⚠️ IMPORTANT: Ignore generic labels like "клиенту Kaspi", "клиенту Казр!", "Kaspi Gold", or "на карту" if a person's name is found anywhere else.
 - NEVER return a JSON object, dict, or nested structure. ALWAYS a simple string.
 
 RULE 7 - KBK (Код бюджетной классификации):
@@ -149,12 +152,22 @@ RULE 8 - KNP (Код назначения платежа):
 
 
 class ReceiptParserService:
+    _reader: Optional[easyocr.Reader] = None
+    
+    @classmethod
+    def _get_ocr_reader(cls) -> easyocr.Reader:
+        """Lazily initialize EasyOCR reader."""
+        if cls._reader is None:
+            logger.info("Initializing EasyOCR reader (ru, en)...")
+            # In-memory initialization. Models are downloaded to ~/.EasyOCR/ on first run.
+            cls._reader = easyocr.Reader(['ru', 'en'])
+        return cls._reader
     """Service for extracting and parsing PDF receipt data."""
 
     DATETIME_PATTERNS = [
-        r"(\d{2}\.\d{2}\.\d{4}\s+\d{2}:\d{2}(?::\d{2})?)",
-        r"(\d{2}-\d{2}-\d{4}\s+\d{2}:\d{2}(?::\d{2})?)",
-        r"(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}(?::\d{2})?)",
+        r"(\d{2}\.\d{2}\.\d{4}\s+\d{2}[:\.]\d{2}(?::\d{2})?)",
+        r"(\d{2}-\d{2}-\d{4}\s+\d{2}[:\.]\d{2}(?::\d{2})?)",
+        r"(\d{4}-\d{2}-\d{2}\s+\d{2}[:\.]\d{2}(?::\d{2})?)",
         r"[Дд]ата[:\s]*(\d{2}[\.\-]\d{2}[\.\-]\d{4})",
     ]
     DATETIME_FORMATS = [
@@ -207,17 +220,35 @@ class ReceiptParserService:
         r"(?:Квитанция|Чек|Документ)\s*№?\s*[:\s]*([A-Za-z0-9\-]+)",
     ]
 
-    @staticmethod
-    def extract_text(file_bytes: bytes) -> str:
-        """Extract text from PDF bytes using PyMuPDF."""
+    @classmethod
+    def extract_text(cls, file_bytes: bytes) -> str:
+        """Extract text from PDF bytes using PyMuPDF with EasyOCR fallback."""
         text_parts = []
         try:
             doc = fitz.open(stream=file_bytes, filetype="pdf")
             for page in doc:
-                text_parts.append(page.get_text())
+                page_text = page.get_text()
+                
+                # If no text on page, try OCR
+                if not page_text.strip():
+                    logger.info(f"No text on page {page.number}, attempting EasyOCR...")
+                    try:
+                        # Render page to image for OCR
+                        pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+                        img_bytes = pix.tobytes("png")
+                        
+                        # Use EasyOCR
+                        reader = cls._get_ocr_reader()
+                        results = reader.readtext(img_bytes)
+                        # Join recognized segments with spaces
+                        page_text = "\n".join([res[1] for res in results])
+                    except Exception as ocr_exc:
+                        logger.error(f"EasyOCR failed on page {page.number}: {ocr_exc}")
+                
+                text_parts.append(page_text)
             doc.close()
         except Exception as exc:
-            logger.error(f"PyMuPDF extraction failed: {exc}")
+            logger.error(f"Extraction pipeline failed: {exc}")
             raise ValueError(f"Failed to extract text from PDF: {exc}") from exc
 
         full_text = "\n".join(text_parts).strip()
@@ -226,10 +257,10 @@ class ReceiptParserService:
             logger.info(f"First 150 chars: {full_text[:150].replace(chr(10), ' ')}")
 
         if not full_text:
-            logger.error("Empty text extracted — likely a scanned image PDF")
+            logger.error("Empty text extracted — OCR also failed or returned nothing")
             raise ValueError(
-                "PDF не содержит текста. Возможно, это скан или фото. "
-                "Пожалуйста, используйте текстовый PDF."
+                "PDF не содержит текста и OCR не смог ничего распознать. "
+                "Убедитесь, что файл является изображением чека."
             )
         return full_text
 
@@ -238,16 +269,26 @@ class ReceiptParserService:
         if not dt_str:
             return None, None
 
+        # Normalize time: if it contains dots where colons are expected (OCR artifact)
+        # e.g., "07.04.2026 08.15" -> "07.04.2026 08:15"
+        if re.search(r"\d{2}\.\d{2}$", dt_str):
+            dt_str = re.sub(r"(\d{2})\.(\d{2})$", r"\1:\2", dt_str)
+
         for pattern in cls.DATETIME_PATTERNS:
             match = re.search(pattern, dt_str)
             if match:
                 raw_dt = match.group(1).strip()
+                # Also normalize dots to colons in the extracted substring
+                if "." in raw_dt[-5:]:
+                    raw_dt = raw_dt[:-5] + raw_dt[-5:].replace(".", ":")
+                
                 for fmt in cls.DATETIME_FORMATS:
                     try:
                         return raw_dt, datetime.strptime(raw_dt, fmt)
                     except ValueError:
                         pass
-
+        
+        # Final fallback for the raw string if regex didn't match perfectly
         for fmt in cls.DATETIME_FORMATS:
             try:
                 return dt_str, datetime.strptime(dt_str, fmt)
