@@ -253,6 +253,12 @@ class ReceiptParserService:
                 temperature=0.0
             )
             content = response.choices[0].message.content
+            logger.info(f"LLM Raw Response Content: {content}")
+            
+            if not content:
+                logger.warning("LLM returned an empty response.")
+                return cls._regex_parse(text)
+
             parsed_data = json.loads(content)
             
             # Handle if Llama wraps the object in a list
@@ -260,8 +266,11 @@ class ReceiptParserService:
                 parsed_data = parsed_data[0]
                 
             parsed = LLMReceiptSchema.model_validate(parsed_data)
+            logger.info("LLM data validated successfully via Pydantic.")
         except Exception as e:
-            logger.error(f"LLM Parsing failed: {e}")
+            logger.error(f"LLM Parsing failed with error: {str(e)}")
+            import traceback
+            logger.error(traceback.format_exc())
             return cls._regex_parse(text)  # seamless fallback
 
         dt_raw, dt_parsed = cls._parse_datetime_str(parsed.datetime_str)
