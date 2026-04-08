@@ -15,7 +15,9 @@ from app.presentation.receipt_router import router as receipt_router
 
 logger = logging.getLogger(__name__)
 
-
+# Configure logging to show INFO level
+import sys
+logging.basicConfig(level=logging.INFO, stream=sys.stdout, format="%(levelname)s: %(name)s - %(message)s")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup/shutdown events."""

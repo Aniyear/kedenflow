@@ -6,7 +6,10 @@ from fastapi import APIRouter, HTTPException, UploadFile, File
 from pydantic import BaseModel
 from typing import Optional
 
+import logging
 from app.application.receipt_parser_service import ReceiptParserService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/receipts", tags=["Receipts"])
 
@@ -78,8 +81,11 @@ async def upload_receipt(file: UploadFile = File(...)):
 async def bulk_upload_receipts(files: list[UploadFile] = File(...)):
     """Upload multiple PDF receipts and parse them sequentially."""
     responses = []
+    logger.info(f"Received bulk upload request with {len(files)} files")
     for file in files:
+        logger.info(f"Processing file: {file.filename} (Type: {file.content_type})")
         if not file.filename or not file.filename.lower().endswith(".pdf"):
+            logger.warning(f"File {file.filename} skipped: not a PDF")
             continue
             
         try:
