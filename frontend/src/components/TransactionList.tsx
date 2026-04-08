@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { Transaction } from "@/types";
 
 interface Props {
@@ -39,6 +40,8 @@ function formatDate(iso: string): string {
 }
 
 export default function TransactionList({ transactions, onDelete }: Props) {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
   if (transactions.length === 0) {
     return (
       <div className="empty-state">
@@ -48,60 +51,87 @@ export default function TransactionList({ transactions, onDelete }: Props) {
     );
   }
 
+  const toggleExpand = (id: string) => {
+    setExpandedId(expandedId === id ? null : id);
+  };
+
   return (
     <div className="tx-list">
       {transactions.map((tx, i) => {
         const isAccrual = tx.type === "accrual";
+        const isExpanded = expandedId === tx.id;
+        
+        // Short subtitle for collapsed view
         const subtitle = [
           tx.receipt_number && `№ ${tx.receipt_number}`,
           tx.party_from && `от: ${tx.party_from}`,
-          tx.comment,
-        ]
-          .filter(Boolean)
-          .join(" · ");
+        ].filter(Boolean).join(" · ");
 
         return (
           <div
             key={tx.id}
-            className="tx-item animate-in"
-            style={{ animationDelay: `${i * 0.03}s` }}
+            className="card animate-in"
+            style={{ animationDelay: `${i * 0.03}s`, marginBottom: '12px', padding: 0, overflow: 'hidden' }}
             id={`tx-item-${tx.id}`}
           >
-            <div
-              className={`tx-item__type tx-item__type--${tx.type}`}
+            {/* Clickable Header */}
+            <div 
+              className="tx-item" 
+              onClick={() => toggleExpand(tx.id)} 
+              style={{ padding: '16px', background: 'transparent', margin: 0, cursor: 'pointer', border: 'none' }}
             >
-              {TYPE_ICONS[tx.type]}
-            </div>
-
-            <div className="tx-item__info">
-              <div className="tx-item__title">
-                {TYPE_LABELS[tx.type]}
-                {tx.source === "receipt" && " 📄"}
+              <div className={`tx-item__type tx-item__type--${tx.type}`}>
+                {TYPE_ICONS[tx.type]}
               </div>
-              <div className="tx-item__subtitle">
-                {formatDate(tx.datetime)}
-                {subtitle ? ` · ${subtitle}` : ""}
+
+              <div className="tx-item__info">
+                <div className="tx-item__title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  {TYPE_LABELS[tx.type]}
+                  {tx.source === "receipt" && <span title="Из чека">📄</span>}
+                </div>
+                <div className="tx-item__subtitle">
+                  {formatDate(tx.datetime)}
+                  {subtitle ? ` · ${subtitle}` : ""}
+                </div>
               </div>
+
+              <div
+                className={`tx-item__amount ${
+                  isAccrual ? "tx-item__amount--positive" : "tx-item__amount--negative"
+                }`}
+              >
+                {isAccrual ? "+" : "−"}{formatAmount(tx.amount)} ₸
+              </div>
+
+              <button
+                className="btn btn--danger btn--sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(tx.id);
+                }}
+                title="Удалить"
+                id={`delete-tx-${tx.id}`}
+                style={{ marginLeft: '12px' }}
+              >
+                ✕
+              </button>
             </div>
 
-            <div
-              className={`tx-item__amount ${
-                isAccrual
-                  ? "tx-item__amount--positive"
-                  : "tx-item__amount--negative"
-              }`}
-            >
-              {isAccrual ? "+" : "−"}{formatAmount(tx.amount)} ₸
-            </div>
-
-            <button
-              className="btn btn--danger btn--sm tx-item__delete"
-              onClick={() => onDelete(tx.id)}
-              title="Удалить"
-              id={`delete-tx-${tx.id}`}
-            >
-              ✕
-            </button>
+            {/* Expanded Details */}
+            {isExpanded && (
+              <div 
+                className="tx-details animate-in" 
+                style={{ padding: '0 16px 16px 64px', fontSize: '0.875rem', color: 'var(--text-secondary)' }}
+              >
+                {tx.party_from && <div style={{ marginBottom: '4px' }}><strong>Отправитель:</strong> {tx.party_from}</div>}
+                {tx.party_to && <div style={{ marginBottom: '4px' }}><strong>Получатель:</strong> {tx.party_to}</div>}
+                {tx.party_identifier && <div style={{ marginBottom: '4px' }}><strong>ИИН/БИН:</strong> {tx.party_identifier}</div>}
+                {tx.kbk && <div style={{ marginBottom: '4px' }}><strong>КБК:</strong> {tx.kbk}</div>}
+                {tx.knp && <div style={{ marginBottom: '4px' }}><strong>КНП:</strong> {tx.knp}</div>}
+                {tx.receipt_number && <div style={{ marginBottom: '4px' }}><strong>№ Документа:</strong> {tx.receipt_number}</div>}
+                {tx.comment && <div style={{ marginBottom: '4px' }}><strong>Комментарий:</strong> {tx.comment}</div>}
+              </div>
+            )}
           </div>
         );
       })}
