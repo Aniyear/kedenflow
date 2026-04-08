@@ -34,6 +34,7 @@ class ParsedReceipt:
     party_to: Optional[str] = None
     kbk: Optional[str] = None
     knp: Optional[str] = None
+    comment: Optional[str] = None
     raw_text: str = ""
     errors: list[str] = field(default_factory=list)
 
@@ -318,6 +319,7 @@ class ReceiptParserService:
             datetime_str=dt_raw,
             parsed_datetime=dt_parsed,
             receipt_number=receipt_number,
+            comment=None,
         )
 
         if r_type == "payment":
@@ -420,6 +422,7 @@ class ReceiptParserService:
                 party_to=parsed.party_to,
                 kbk=str(parsed.kbk) if parsed.kbk is not None else None,
                 knp=str(parsed.knp) if parsed.knp is not None else None,
+                comment=None,
                 raw_text=text,
             )
 

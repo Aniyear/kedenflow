@@ -91,9 +91,9 @@ export default function UploadReceiptModal({
         receipt_number: data.receipt_number || undefined,
         party_from: data.party_from || undefined,
         party_to: data.party_to || undefined,
-        party_identifier: data.party_identifier || undefined,
         kbk: data.kbk || undefined,
         knp: data.knp || undefined,
+        comment: data.comment || undefined,
         source: "receipt",
         raw_text: data.raw_text || undefined,
       }));
@@ -178,7 +178,7 @@ export default function UploadReceiptModal({
                     <th style={{ padding: "12px", borderRight: "1px solid var(--border)", position: 'sticky', top: 0, background: 'var(--bg-secondary)', zIndex: 1 }}>Дата</th>
                     <th style={{ padding: "12px", borderRight: "1px solid var(--border)", position: 'sticky', top: 0, background: 'var(--bg-secondary)', zIndex: 1, minWidth: "150px" }}>Отправитель</th>
                     <th style={{ padding: "12px", borderRight: "1px solid var(--border)", position: 'sticky', top: 0, background: 'var(--bg-secondary)', zIndex: 1, minWidth: "150px" }}>Получатель</th>
-                    <th style={{ padding: "12px", borderRight: "1px solid var(--border)", position: 'sticky', top: 0, background: 'var(--bg-secondary)', zIndex: 1, minWidth: "120px" }}>ИИН/БИН</th>
+                    <th style={{ padding: "12px", borderRight: "1px solid var(--border)", position: 'sticky', top: 0, background: 'var(--bg-secondary)', zIndex: 1, minWidth: "150px" }}>Комментарий</th>
                     <th style={{ padding: "12px", borderRight: "1px solid var(--border)", position: 'sticky', top: 0, background: 'var(--bg-secondary)', zIndex: 1, minWidth: "180px" }}>КБК / Описание</th>
                     <th style={{ padding: "12px", position: 'sticky', top: 0, background: 'var(--bg-secondary)', zIndex: 1, minWidth: "150px" }}>КНП</th>
                   </tr>
@@ -240,8 +240,8 @@ export default function UploadReceiptModal({
                         <input
                           type="text"
                           style={{ width: "100%", padding: "4px 8px", border: "1px solid var(--border)", borderRadius: "4px" }}
-                          value={p.party_identifier ?? ""}
-                          onChange={(e) => updateField(i, "party_identifier", e.target.value || null)}
+                          value={p.comment ?? ""}
+                          onChange={(e) => updateField(i, "comment", e.target.value || null)}
                         />
                       </td>
                       <td style={{ padding: "8px", borderRight: "1px solid var(--border)" }}>

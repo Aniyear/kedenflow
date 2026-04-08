@@ -25,6 +25,7 @@ class ReceiptParseResponse(BaseModel):
     party_to: Optional[str] = None
     kbk: Optional[str] = None
     knp: Optional[str] = None
+    comment: Optional[str] = None
     raw_text: str = ""
     errors: list[str] = []
 
@@ -71,6 +72,7 @@ async def upload_receipt(file: UploadFile = File(...)):
         party_to=result.party_to,
         kbk=result.kbk,
         knp=result.knp,
+        comment=result.comment,
         raw_text=result.raw_text,
         errors=result.errors,
     )
@@ -98,6 +100,7 @@ async def bulk_upload_receipts(files: list[UploadFile] = File(...)):
                 party_to=result.party_to,
                 kbk=result.kbk,
                 knp=result.knp,
+                comment=result.comment,
                 raw_text=result.raw_text,
                 errors=result.errors,
             ))

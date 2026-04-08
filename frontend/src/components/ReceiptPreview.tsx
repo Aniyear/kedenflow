@@ -84,6 +84,17 @@ export default function ReceiptPreview({
         />
       </div>
 
+      <div className="form-group">
+        <label className="form-label">Комментарий</label>
+        <textarea
+          className="form-input"
+          value={editData.comment ?? ""}
+          onChange={(e) => updateField("comment", e.target.value || null)}
+          rows={2}
+          placeholder="Например: Остаток за февраль"
+        />
+      </div>
+
       <div className="form-row">
         <div className="form-group">
           <label className="form-label">Отправитель</label>

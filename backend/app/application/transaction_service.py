@@ -78,7 +78,7 @@ class TransactionService:
         headers = [
             "Дата", "Тип", "Сумма", "Источник", 
             "Номер чека", "Отправитель", "Получатель", 
-            "ИИН/БИН", "КБК", "КНП", "Добавлен"
+            "Комментарий", "КБК", "КНП", "Добавлен"
         ]
         
         ws.append(headers)
@@ -113,7 +113,7 @@ class TransactionService:
                 tx.receipt_number or "",
                 tx.party_from or "",
                 tx.party_to or "",
-                tx.party_identifier or "",
+                tx.comment or "",
                 tx.kbk or "",
                 tx.knp or "",
                 display_created.strftime("%d.%m.%Y %H:%M")

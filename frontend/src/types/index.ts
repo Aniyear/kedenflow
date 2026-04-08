@@ -21,7 +21,6 @@ export interface Transaction {
   receipt_number?: string | null;
   party_from?: string | null;
   party_to?: string | null;
-  party_identifier?: string | null;
   kbk?: string | null;
   knp?: string | null;
   comment?: string | null;
@@ -38,7 +37,6 @@ export interface TransactionCreate {
   receipt_number?: string;
   party_from?: string;
   party_to?: string;
-  party_identifier?: string;
   kbk?: string;
   knp?: string;
   comment?: string;
@@ -53,9 +51,9 @@ export interface ReceiptParseResult {
   receipt_number?: string | null;
   party_from?: string | null;
   party_to?: string | null;
-  party_identifier?: string | null;
   kbk?: string | null;
   knp?: string | null;
+  comment?: string | null;
   raw_text: string;
   errors: string[];
 }
