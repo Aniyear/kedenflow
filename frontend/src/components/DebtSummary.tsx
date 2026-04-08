@@ -41,12 +41,6 @@ export default function DebtSummary({ debt, transactions }: Props) {
         </div>
       </div>
 
-      <div className="debt-card">
-        <div className="debt-card__label">Всего начислено</div>
-        <div className="debt-card__value" style={{ color: "var(--warning)" }}>
-          {formatAmount(totalAccrual)} ₸
-        </div>
-      </div>
 
       <div className="debt-card">
         <div className="debt-card__label">Всего оплачено</div>
