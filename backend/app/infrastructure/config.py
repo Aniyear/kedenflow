@@ -13,6 +13,11 @@ class Settings(BaseSettings):
     database_url: str
     app_name: str = "FinLog"
     debug: bool = False
+    
+    # LLM Settings (Optional for fallback)
+    llm_api_key: str | None = None
+    llm_base_url: str | None = None
+    llm_model_name: str = "gpt-4o-mini"
 
     class Config:
         env_file = ".env"

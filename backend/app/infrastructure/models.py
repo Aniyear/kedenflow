@@ -73,12 +73,12 @@ class TransactionModel(Base):
     datetime: Mapped[dt.datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
     )
-    receipt_number: Mapped[str | None] = mapped_column(String(100))
-    party_from: Mapped[str | None] = mapped_column(String(255))
-    party_to: Mapped[str | None] = mapped_column(String(255))
-    party_identifier: Mapped[str | None] = mapped_column(String(100))
-    kbk: Mapped[str | None] = mapped_column(String(50))
-    knp: Mapped[str | None] = mapped_column(String(50))
+    receipt_number: Mapped[str | None] = mapped_column(Text)
+    party_from: Mapped[str | None] = mapped_column(Text)
+    party_to: Mapped[str | None] = mapped_column(Text)
+    party_identifier: Mapped[str | None] = mapped_column(Text)
+    kbk: Mapped[str | None] = mapped_column(Text)
+    knp: Mapped[str | None] = mapped_column(Text)
     comment: Mapped[str | None] = mapped_column(Text)
     source: Mapped[str] = mapped_column(String(20), default="manual")
     raw_text: Mapped[str | None] = mapped_column(Text)
