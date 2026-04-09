@@ -42,13 +42,18 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isDeactivated, setIsDeactivated] = useState(false);
 
   const fetchProfile = useCallback(async () => {
     try {
       const p = await getMyProfile();
       setProfile(p);
-    } catch (err) {
+      setIsDeactivated(false);
+    } catch (err: any) {
       console.error("Failed to fetch profile:", err);
+      if (err.message && err.message.includes("Account is deactivated")) {
+        setIsDeactivated(true);
+      }
       setProfile(null);
     }
   }, []);
@@ -94,6 +99,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setSession(null);
     setProfile(null);
+    setIsDeactivated(false);
   };
 
   const refreshProfile = async () => {
@@ -104,7 +110,50 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{ user, session, profile, loading, signIn, signOut, refreshProfile }}
     >
-      {children}
+      {isDeactivated ? (
+        <div 
+          className="container" 
+          style={{ 
+            display: "flex", 
+            flexDirection: "column", 
+            alignItems: "center", 
+            justifyContent: "center", 
+            height: "100vh", 
+            textAlign: "center" 
+          }}
+        >
+          <div 
+            className="card" 
+            style={{ 
+              maxWidth: "400px", 
+              padding: "var(--space-2xl)", 
+              border: "2px solid var(--border-active)",
+              boxShadow: "0 20px 40px rgba(0,0,0,0.3)"
+            }}
+          >
+            <div 
+              style={{ 
+                fontSize: "4rem", 
+                marginBottom: "var(--space-md)",
+                filter: "drop-shadow(0 0 10px rgba(239, 68, 68, 0.4))"
+              }}
+            >
+              🔒
+            </div>
+            <h1 className="header__title" style={{ fontSize: "1.5rem", marginBottom: "var(--space-sm)" }}>
+              Доступ заблокирован
+            </h1>
+            <p className="header__subtitle" style={{ marginBottom: "var(--space-xl)", color: "var(--text-muted)" }}>
+              Ваш аккаунт деактивирован администратором. Пожалуйста, свяжитесь с поддержкой для восстановления доступа.
+            </p>
+            <button className="btn btn--primary btn--lg" style={{ width: "100%" }} onClick={signOut}>
+              Выйти из системы
+            </button>
+          </div>
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 }
