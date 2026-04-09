@@ -3,17 +3,17 @@ import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
-  title: "FinLog — Финансовая платформа",
-  description: "PWA-приложение для финансового учёта и управления",
+  title: "KedenFlow — Финансовая платформа",
+  description: "PWA-приложение для финансового учёта и управления KedenFlow",
   manifest: "/manifest.json",
   icons: {
-    icon: "/icons/icon-192.png",
-    apple: "/icons/icon-512.png",
+    icon: "/logo.png",
+    apple: "/logo.png",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0e1a",
+  themeColor: "#17252A",
   width: "device-width",
   initialScale: 1,
 };

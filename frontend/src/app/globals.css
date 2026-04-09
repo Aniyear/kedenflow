@@ -3,25 +3,26 @@
 /* ===== CSS Variables (Design Tokens) ===== */
 :root {
   /* Colors */
-  --bg-primary: #0a0e1a;
-  --bg-secondary: #111827;
-  --bg-card: rgba(17, 24, 39, 0.7);
-  --bg-card-hover: rgba(17, 24, 39, 0.9);
-  --bg-glass: rgba(255, 255, 255, 0.03);
-  --bg-glass-hover: rgba(255, 255, 255, 0.06);
-  --bg-modal: rgba(10, 14, 26, 0.95);
+  /* Colors - High Contrast Teal & Mint */
+  --bg-primary: #17252A;
+  --bg-secondary: #0b1215;
+  --bg-card: rgba(43, 122, 120, 0.25);
+  --bg-card-hover: rgba(43, 122, 120, 0.35);
+  --bg-glass: rgba(58, 175, 169, 0.08);
+  --bg-glass-hover: rgba(58, 175, 169, 0.15);
+  --bg-modal: rgba(11, 18, 21, 0.98);
 
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-active: rgba(99, 102, 241, 0.5);
+  --border-color: rgba(222, 242, 241, 0.2);
+  --border-active: #3AAFA9;
 
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-primary: #FEFFFF;
+  --text-secondary: #DEF2F1;
+  --text-muted: #3AAFA9;
 
-  --accent: #6366f1;
-  --accent-hover: #818cf8;
-  --accent-glow: rgba(99, 102, 241, 0.15);
-  --accent-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
+  --accent: #3AAFA9;
+  --accent-hover: #DEF2F1;
+  --accent-glow: rgba(58, 175, 169, 0.2);
+  --accent-gradient: linear-gradient(135deg, #2B7A78, #3AAFA9);
 
   --success: #10b981;
   --success-bg: rgba(16, 185, 129, 0.1);
@@ -48,11 +49,12 @@
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 20px var(--accent-glow);
+  /* Shadows - Sharper for High Contrast */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 8px -1px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 12px 20px -3px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 24px 30px -5px rgba(0, 0, 0, 0.7);
+  --shadow-glow: 0 0 20px rgba(58, 175, 169, 0.25);
 
   /* Transitions */
   --transition-fast: 150ms ease;
@@ -86,7 +88,13 @@ body {
   overflow-y: auto;
 }
 
-/* Subtle background gradient */
+/* Deep animated background */
+body {
+  position: relative;
+  background-color: var(--bg-primary);
+  overflow-x: hidden;
+}
+
 body::before {
   content: '';
   position: fixed;
@@ -95,10 +103,39 @@ body::before {
   width: 100%;
   height: 100%;
   background:
-    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(99, 102, 241, 0.08), transparent),
-    radial-gradient(ellipse 60% 50% at 80% 90%, rgba(139, 92, 246, 0.06), transparent);
+    radial-gradient(circle at 15% 15%, rgba(43, 122, 120, 0.15), transparent 40%),
+    radial-gradient(circle at 85% 85%, rgba(58, 175, 169, 0.12), transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(11, 18, 21, 0.5), transparent 80%);
+  animation: bgPulse 20s ease-in-out infinite alternate;
   pointer-events: none;
   z-index: 0;
+}
+
+@keyframes bgPulse {
+  0% { transform: scale(1) translate(0, 0); }
+  50% { transform: scale(1.1) translate(20px, -20px); }
+  100% { transform: scale(1) translate(-20px, 20px); }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 /* ===== Typography ===== */
@@ -188,18 +225,19 @@ a:hover {
 /* ===== Cards ===== */
 .card {
   background: var(--bg-card);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: var(--space-lg);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-md);
   transition: all var(--transition-base);
+  animation: fadeInUp 0.5s ease-out forwards;
 }
 
 .card:hover {
-  background: var(--bg-card-hover);
   border-color: var(--border-active);
-  box-shadow: var(--shadow-glow);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
   transform: translateY(-2px);
 }
 
@@ -239,12 +277,35 @@ a:hover {
 .btn--primary {
   background: var(--accent-gradient);
   color: white;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  border: none;
+  box-shadow: 0 4px 15px rgba(58, 175, 169, 0.3);
+  position: relative;
+  overflow: hidden;
 }
 
-.btn--primary:hover:not(:disabled) {
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
-  transform: translateY(-1px);
+.btn--primary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.btn--primary:hover::after {
+  left: 100%;
+}
+
+.btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(58, 175, 169, 0.4);
 }
 
 .btn--success {
@@ -948,18 +1009,7 @@ textarea.form-input {
   margin-bottom: var(--space-xl);
 }
 
-.login-logo__icon {
-  width: 64px;
-  height: 64px;
-  background: var(--accent-gradient);
-  border-radius: var(--radius-lg);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.75rem;
-  margin-bottom: var(--space-md);
-  box-shadow: var(--shadow-glow);
-}
+/* Removed login-logo icon box as per branding cleanup */
 
 .login-logo__title {
   font-size: 2rem;
@@ -1034,24 +1084,26 @@ textarea.form-input {
 .module-card {
   display: flex;
   align-items: center;
-  gap: var(--space-lg);
-  padding: var(--space-lg) var(--space-xl);
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
   background: var(--bg-card);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  transition: all var(--transition-base);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   text-decoration: none;
   color: inherit;
   cursor: pointer;
+  flex-direction: column;
+  height: 100%;
 }
 
 .module-card:hover {
   background: var(--bg-card-hover);
   border-color: var(--border-active);
-  box-shadow: var(--shadow-glow);
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  transform: translateY(-4px);
   color: inherit;
 }
 
@@ -1066,9 +1118,9 @@ textarea.form-input {
 }
 
 .module-card__icon {
-  font-size: 2rem;
-  width: 56px;
-  height: 56px;
+  font-size: 1.25rem;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1306,7 +1358,7 @@ textarea.form-input {
 }
 
 .data-table th {
-  background: #1e293b;
+  background: #0b1215;
   padding: var(--space-sm) var(--space-md);
   text-align: left;
   font-weight: 700;

@@ -54,10 +54,9 @@ export default function LoginPage() {
   return (
     <div className="login-page">
       <div className="login-card">
-        {/* Logo */}
         <div className="login-logo">
-          <div className="login-logo__icon">📊</div>
-          <h1 className="login-logo__title">FinLog</h1>
+          <img src="/logo.png" alt="KedenFlow Logo" style={{ width: 64, height: 64, borderRadius: 12, marginBottom: 20 }} />
+          <h1 className="login-logo__title">KedenFlow</h1>
           <p className="login-logo__subtitle">Финансовая платформа</p>
         </div>
 

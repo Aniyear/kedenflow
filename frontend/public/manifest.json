@@ -1,11 +1,11 @@
 {
-  "name": "FinLog",
-  "short_name": "FinLog",
-  "description": "Учёт задолженностей декларантов",
+  "name": "KedenFlow",
+  "short_name": "KedenFlow",
+  "description": "Учёт задолженностей декларантов KedenFlow",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0a0e1a",
-  "theme_color": "#0a0e1a",
+  "background_color": "#17252A",
+  "theme_color": "#17252A",
   "orientation": "portrait-primary",
   "icons": [
     {

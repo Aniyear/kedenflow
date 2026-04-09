@@ -43,9 +43,9 @@ export default function HomePage() {
       <header className="header">
         <div className="header__inner">
           <div className="header__logo">
-            <div className="header__logo-icon">📊</div>
+            <img src="/logo.png" alt="Logo" style={{ width: 32, height: 32, borderRadius: 6, marginRight: 12 }} />
             <div>
-              <div className="header__title">FinLog</div>
+              <div className="header__title">KedenFlow</div>
               <div className="header__subtitle">Финансовая платформа</div>
             </div>
           </div>
