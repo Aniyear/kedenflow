@@ -81,16 +81,16 @@ function ConverterContent() {
       setPreview(data);
       setVisibleRows(50);
       
-      const rules: Record<AggregationRule, AggregationRule> = {}; // Fixed type if needed
+      const rules: Record<string, AggregationRule> = {};
       data.columns.forEach((col) => {
         const lowerCol = col.toLowerCase();
         if (lowerCol.includes("price") || lowerCol.includes("цена")) {
-          rules[col as unknown as AggregationRule] = "unique_join";
+          rules[col] = "unique_join";
         } else {
-          rules[col as unknown as AggregationRule] = data.column_types[col] === "numeric" ? "sum" : "unique_join";
+          rules[col] = data.column_types[col] === "numeric" ? "sum" : "unique_join";
         }
       });
-      setColumnRules(rules as unknown as Record<string, AggregationRule>);
+      setColumnRules(rules);
 
       const defaultGroupCol = data.columns.find(
         (col) => col.toLowerCase().includes("hs code") || col.toLowerCase().includes("тн вэд")
