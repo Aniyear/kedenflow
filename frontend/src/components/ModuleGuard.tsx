@@ -14,11 +14,15 @@ interface ModuleGuardProps {
  * Redirects to home if user doesn't have access.
  */
 export default function ModuleGuard({ moduleId, children }: ModuleGuardProps) {
-  const { profile, loading } = useAuth();
+  const { profile, user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && profile) {
+    if (loading) return;
+    
+    if (!user) {
+      router.replace("/login?error=Пожалуйста, войдите в систему");
+    } else if (profile) {
       const hasAccess =
         profile.role === "admin" ||
         profile.modules.some((m) => m.id === moduleId);
@@ -26,7 +30,7 @@ export default function ModuleGuard({ moduleId, children }: ModuleGuardProps) {
         router.replace("/");
       }
     }
-  }, [profile, loading, moduleId, router]);
+  }, [user, profile, loading, moduleId, router]);
 
   if (loading) {
     return (

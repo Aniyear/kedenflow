@@ -13,14 +13,18 @@ interface AdminGuardProps {
  * Redirects to home if user is not admin.
  */
 export default function AdminGuard({ children }: AdminGuardProps) {
-  const { profile, loading } = useAuth();
+  const { profile, user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && profile && profile.role !== "admin") {
+    if (loading) return;
+    
+    if (!user) {
+      router.replace("/login?error=Пожалуйста, войдите в систему");
+    } else if (profile && profile.role !== "admin") {
       router.replace("/");
     }
-  }, [profile, loading, router]);
+  }, [user, profile, loading, router]);
 
   if (loading) {
     return (

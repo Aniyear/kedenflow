@@ -1022,19 +1022,18 @@ textarea.form-input {
     justify-self: end;
   }
 
-  /* Modal → bottom sheet on mobile */
+  /* Center modal on mobile for better input/keyboard UX */
   .modal-overlay {
-    align-items: flex-end;
-    padding: 0;
+    align-items: center;
+    padding: var(--space-md);
   }
 
   .modal {
     padding: var(--space-lg);
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-    max-height: 92vh;
+    border-radius: var(--radius-xl);
+    max-height: 90vh;
     margin: 0;
-    animation: slideUpMobile 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-    padding-bottom: calc(var(--space-xl) + env(safe-area-inset-bottom, 16px));
+    animation: slideUp 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .debt-summary {
