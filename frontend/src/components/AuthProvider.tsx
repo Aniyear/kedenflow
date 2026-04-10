@@ -52,7 +52,6 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       setPendingApproval(false);
       setIsDeactivated(false);
     } catch (err: any) {
-      console.error("Failed to fetch profile:", err);
       const msg = err?.message || "";
       if (msg.includes("ожидает подтверждения")) {
         setPendingApproval(true);
@@ -60,6 +59,9 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       } else if (msg.includes("deactivated") || msg.includes("деактивирован")) {
         setIsDeactivated(true);
         setPendingApproval(false);
+      } else {
+        // Only log unexpected errors to console
+        console.error("Failed to fetch profile:", err);
       }
       setProfile(null);
     }
@@ -96,7 +98,6 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     const handleAuthError = async (e: Event) => {
       const customEvent = e as CustomEvent;
       const message = customEvent.detail?.message || "Сессия истекла";
-      console.warn("Global auth error caught:", message);
 
       // If it's a pending approval message, handle gracefully
       if (message.includes("ожидает подтверждения")) {
@@ -109,6 +110,8 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         setIsDeactivated(true);
         return;
       }
+
+      console.warn("Global auth error caught:", message);
 
       await supabase.auth.signOut();
       setUser(null);
