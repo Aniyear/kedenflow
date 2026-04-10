@@ -132,7 +132,8 @@ RULE 6 - PARTY_TO:
 - Return ONLY a plain text string — the name of the recipient/beneficiary.
 - ⚠️ IMPORTANT: In Kaspi transfers, the recipient's name (e.g., "Дастан О.") often follows the amount. OCR might add noise characters like "oe", "ә", "«" to the name. Clean them up.
 - ⚠️ IMPORTANT: If a name is followed by "0." or "o.", this is likely a misread initial "О.". Return it as "О." (e.g., "Дастан О.").
-- ⚠️ IMPORTANT: Search for names in the whole text. Often they are near labels like "Получатель", "Бенефициар", "ФИО получателя".
+- ⚠️ IMPORTANT: Search for names in the whole text. Often they are near labels like "Получатель", "Бенефициар", "ФИО получателя" or "Место получения услуги".
+- ⚠️ IMPORTANT: If you see "Место получения услуги", extract the full authority/department name as the recipient (e.g., "РГУ УГД по городу...").
 - ⚠️ IMPORTANT: Ignore generic labels like "клиенту Kaspi", "клиенту Казр!", "Kaspi Gold", or "на карту" if a person's name is found anywhere else.
 - NEVER return a JSON object, dict, or nested structure. ALWAYS a simple string.
 
