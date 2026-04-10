@@ -61,20 +61,10 @@ export default function HomePage() {
               🆘 Поддержка
             </button>
             <div className="header__user">
-              <span className="header__user-name">
+              <Link href="/profile" className="header__user-name" title="Настройки профиля">
                 {profile.display_name}
-              </span>
-              <span className="header__user-role">
-                {profile.role === "admin" ? "Админ" : "Пользователь"}
-              </span>
+              </Link>
             </div>
-            <button
-              className="btn btn--ghost btn--sm"
-              onClick={signOut}
-              id="logout-btn"
-            >
-              Выйти
-            </button>
           </div>
         </div>
       </header>

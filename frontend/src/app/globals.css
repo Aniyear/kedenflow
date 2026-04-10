@@ -1200,9 +1200,22 @@ textarea.form-input {
 
 .header__user-name {
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   color: var(--text-primary);
-  line-height: 1.3;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  background: var(--bg-glass);
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+}
+
+.header__user-name:hover {
+  background: var(--bg-glass-hover);
+  border-color: var(--border-active);
+  color: var(--accent);
 }
 
 .header__user-role {
@@ -1684,7 +1697,7 @@ textarea.form-input {
     gap: var(--space-sm);
   }
 
-  .header__user {
+  .header__user-role {
     display: none;
   }
 
