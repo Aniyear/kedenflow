@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
@@ -16,7 +16,13 @@ export default function ProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error", text: string } | null>(null);
 
-  if (loading) {
+  useEffect(() => {
+    if (!loading && (!user || !profile)) {
+      router.replace("/login");
+    }
+  }, [user, profile, loading, router]);
+
+  if (loading || !user || !profile) {
     return (
       <div className="container">
         <div className="loading-screen">
@@ -25,11 +31,6 @@ export default function ProfilePage() {
         </div>
       </div>
     );
-  }
-
-  if (!user || !profile) {
-    router.replace("/login");
-    return null;
   }
 
   const handleUpdate = async (e: React.FormEvent) => {

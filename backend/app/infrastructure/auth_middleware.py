@@ -144,6 +144,7 @@ async def get_current_user(
                 [m.id for m in all_modules],
             )
 
+        await session.commit()
         logger.info(f"Auto-created profile for {email} (role={role})")
 
     if not user.is_active:

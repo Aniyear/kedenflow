@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { getMyProfile } from "@/lib/api";
 import Link from "next/link";
 
 export default function SignupPage() {
@@ -41,6 +42,17 @@ export default function SignupPage() {
       });
 
       if (signUpError) throw signUpError;
+
+      // Sync with backend if a session was created (this creates the DB profile)
+      if (data.session) {
+        try {
+          await getMyProfile(true);
+        } catch (syncErr) {
+          // Ignore synchronization errors (like 403 Forbidden for inactive users)
+          // as they are expected since the profile was just created in inactive state.
+          console.log("Profile synchronized with backend (pending state)");
+        }
+      }
 
       setSuccess(true);
       // Success - user needs to confirm email (if enabled) or just knows account is pending

@@ -34,7 +34,7 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
 
 async function request<T>(
   endpoint: string,
-  options?: RequestInit
+  options?: RequestInit & { skipAuthError?: boolean }
 ): Promise<T> {
   const authHeaders = await getAuthHeaders();
 
@@ -51,7 +51,7 @@ async function request<T>(
     const errorData = await res.json().catch(() => ({}));
     
     // Global handling for expired sessions or deactivated accounts (401/403)
-    if ((res.status === 401 || res.status === 403) && typeof window !== "undefined") {
+    if (!options?.skipAuthError && (res.status === 401 || res.status === 403) && typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("auth-error", { 
         detail: { message: errorData.detail || "Сессия истекла. Пожалуйста, войдите снова." }
       }));
@@ -70,8 +70,8 @@ async function request<T>(
 
 // --- Auth ---
 
-export async function getMyProfile(): Promise<UserProfile> {
-  return request<UserProfile>("/auth/me");
+export async function getMyProfile(skipAuthError: boolean = false): Promise<UserProfile> {
+  return request<UserProfile>("/auth/me", { skipAuthError });
 }
 
 // --- Brokers ---
